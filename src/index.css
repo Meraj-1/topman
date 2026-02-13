@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+
+html {
+  scroll-behavior: smooth;
+  /* Navbar ki height ke barabar padding taaki section upar se na kante */
+  scroll-padding-top: 100px; 
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
