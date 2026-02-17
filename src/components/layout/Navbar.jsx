@@ -7,16 +7,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      // Logic: Scroll effect sirf tab dikhega jab mobile menu CLOSE ho
+      if (!mobileMenuOpen) {
+        setIsScrolled(window.scrollY > 40);
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [mobileMenuOpen]);
 
-  // Prevent body scroll when menu is open
+  // Prevent body scroll and force "Solid" header when menu is open
   useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+      // Menu close hote hi current scroll position check karo
+      setIsScrolled(window.scrollY > 40);
+    }
   }, [mobileMenuOpen]);
 
   const navLinks = [
@@ -31,14 +39,16 @@ export default function Navbar() {
   return (
     <>
       <nav className={`fixed w-full z-[100] transition-all duration-500 ease-in-out ${
-        isScrolled 
-          ? 'bg-[#FCFBF7]/95 backdrop-blur-md py-4 shadow-md' 
+        // Agar mobile menu open hai, toh hamesha full background aur original padding rakho
+        (isScrolled || mobileMenuOpen) 
+          ? 'bg-[#FCFBF7] py-4 shadow-md' 
           : 'bg-transparent py-8'
       }`}>
         
         {/* --- Top Information Bar (Desktop) --- */}
+        {/* Mobile menu khulte hi ye invisible ho jana chahiye to save space */}
         <div className={`hidden lg:block overflow-hidden transition-all duration-500 ${
-          isScrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-10 opacity-100 mb-6'
+          (isScrolled || mobileMenuOpen) ? 'max-h-0 opacity-0 mb-0' : 'max-h-10 opacity-100 mb-6'
         }`}>
           <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center border-b border-[#1A1A1A]/5 pb-3">
             <div className="flex gap-6 text-[9px] tracking-[0.3em] text-[#4A4A4A] font-medium">
@@ -54,23 +64,26 @@ export default function Navbar() {
 
         <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
           
-          {/* --- Left: Socials --- */}
+          {/* --- Left: Socials (Desktop Only) --- */}
           <div className="flex-1 hidden lg:flex items-center gap-6">
             <a href="https://instagram.com/topmandesignerstudio" target="_blank" rel="noreferrer" 
-               className="text-[#1A1A1A] hover:text-[#C5A059] transition-all duration-300 transform hover:scale-110">
+               className="text-[#1A1A1A] hover:text-[#C5A059] transition-all transform hover:scale-110">
               <Instagram size={20} strokeWidth={1.2} />
             </a>
           </div>
 
           {/* --- Center: Brand Identity --- */}
-          <div className="flex flex-col items-center transition-transform duration-500">
+          <div className="flex flex-col items-center">
             <h1 className={`font-serif tracking-[0.5em] transition-all duration-500 text-[#1A1A1A] font-light leading-none ${
-              isScrolled ? 'text-xl sm:text-2xl' : 'text-3xl sm:text-5xl'
+              // Mobile menu open hone par font size stable rakho (na bohot bada, na chota)
+              (isScrolled || mobileMenuOpen) ? 'text-xl sm:text-2xl' : 'text-3xl sm:text-5xl'
             }`}>
               TOPMAN
             </h1>
+            
+            {/* Tagline logic: Menu open hone par ye hide ho jayegi for better mobile view */}
             <div className={`flex items-center gap-3 w-full transition-all duration-500 overflow-hidden ${
-              isScrolled ? 'max-h-0 opacity-0 mt-0' : 'max-h-10 opacity-100 mt-2'
+              (isScrolled || mobileMenuOpen) ? 'max-h-0 opacity-0 mt-0' : 'max-h-10 opacity-100 mt-2'
             }`}>
               <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#C5A059]/40"></div>
               <span className="text-[8px] tracking-[0.5em] text-[#C5A059] uppercase font-semibold whitespace-nowrap">
@@ -98,7 +111,7 @@ export default function Navbar() {
                  <Phone size={19} strokeWidth={1.5} />
               </a>
               <button 
-                className="xl:hidden z-[110] relative text-[#1A1A1A] p-2"
+                className="xl:hidden z-[110] relative text-[#1A1A1A] p-2 focus:outline-none"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X size={28} strokeWidth={1.2} /> : <Menu size={28} strokeWidth={1.2} />}
@@ -108,9 +121,9 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- Fullscreen Mobile Menu --- */}
+      {/* --- Fullscreen Mobile Menu Overlay --- */}
       <div className={`fixed inset-0 z-[95] bg-[#FCFBF7] transition-all duration-700 ease-[cubic-bezier(0.77,0,0.175,1)] ${
-        mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
+        mobileMenuOpen ? 'translate-y-0 visible opacity-100' : '-translate-y-full invisible opacity-0'
       }`}>
         <div className="h-full flex flex-col items-center justify-center p-8">
           <div className="mb-12 text-[#C5A059] text-[10px] tracking-[0.8em] uppercase font-black opacity-40">
@@ -134,11 +147,11 @@ export default function Navbar() {
           </div>
           
           <div className={`mt-20 flex flex-col items-center gap-8 transition-all duration-1000 delay-500 ${
-            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent"></div>
             <a href="https://wa.me/917021843417" 
-               className="text-[10px] tracking-[0.3em] font-bold text-[#FCFBF7] bg-[#1A1A1A] px-10 py-5 rounded-sm hover:bg-[#C5A059] transition-all shadow-xl">
+               className="text-[10px] tracking-[0.3em] font-bold text-[#FCFBF7] bg-[#1A1A1A] px-10 py-5 rounded-sm active:bg-[#C5A059] transition-all">
               WHATSAPP CONSULTATION
             </a>
           </div>
